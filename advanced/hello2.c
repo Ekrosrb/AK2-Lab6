@@ -1,19 +1,17 @@
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/printk.h>
-#include <linux/moduleparam.h>
-#include <linux/errno.h>
-#include "hello1.h"
+// SPDX-License-Identifier: GPL-3.0-only
 
+#include <linux/moduleparam.h>
+#include "hello1.h"
 
 extern int print_hello(uint);
 
 static uint count = 1;
 
-module_param(count, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+module_param(count, uint, 0660);
 MODULE_PARM_DESC(count,  "The parameter shows how many times the message will be displayed.");
 
-static int __init hello2_init(void){
+static int __init hello2_init(void)
+{
 	return print_hello(count);
 }
 

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
 #ifndef HELLO1_H
 #define HELLO1_H
 #include <linux/init.h>
@@ -15,6 +16,6 @@ struct hello_data {
 struct list_head *elem, *safe;
 struct hello_data *data;
 
-int print_hello(uint);
+int print_hello(uint count);
 
 #endif

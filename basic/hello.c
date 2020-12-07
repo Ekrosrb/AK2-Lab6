@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 
 /*
  * Copyright (c) 2017, GlobalLogic Ukraine LLC
@@ -51,7 +52,7 @@ struct hello_data *data;
 MODULE_AUTHOR("Serhii Popovych <serhii.popovych@globallogic.com>");
 MODULE_DESCRIPTION("Hello, world in Linux Kernel Training");
 MODULE_LICENSE("Dual BSD/GPL");
-module_param(count, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+module_param(count, uint, 0660);
 MODULE_PARM_DESC(count,  "The parameter shows how many times the message will be displayed.");
 
 LIST_HEAD(list);
@@ -59,29 +60,30 @@ LIST_HEAD(list);
 static int __init hello_init(void)
 {
 
-	if(count == 0){
-		printk(KERN_WARNING "Small value of 'count'!\n");
-	}else if(count > 5 && count <= 10){
-		printk(KERN_WARNING "Big value of 'count'!\n");
-	}else if(count > 0 && count <= 5){
+	if (count == 0) {
+		pr_warn("Small value of 'count'!\n");
+	} else if (count > 5 && count <= 10) {
+		pr_warn("Big value of 'count'!\n");
+	} else if (count > 0 && count <= 5) {
 		int i = 0;
-		for(; i < count; i++){
+
+		for (; i < count; i++) {
 			data = kmalloc(sizeof(*data), GFP_KERNEL);
 			data->time = ktime_get();
 			list_add_tail(&(data->list), &list);
-			printk(KERN_EMERG "Hello, world!\n");
+			pr_emerg("Hello, world!\n");
 		}
-	}else{
-		printk(KERN_ERR "Invalid value of 'count'!\n");
-		return -EINVAL;	
+	} else {
+		pr_err("Invalid value of 'count'!\n");
+		return -EINVAL;
 	}
-	
+
 	return 0;
 }
 
 static void __exit hello_exit(void)
 {
-	list_for_each_safe(elem, safe, &list){
+	list_for_each_safe(elem, safe, &list) {
 		data = list_entry(elem, struct hello_data, list);
 		pr_alert("ktime: %lu\n", (unsigned long) data->time);
 		list_del(elem);
