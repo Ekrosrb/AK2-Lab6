@@ -33,14 +33,28 @@
 #include <linux/module.h>
 #include <linux/printk.h>
 #include <linux/moduleparam.h>
+#include <linux/list.h>
+#include <linux/slab.h>
+#include <linux/ktime.h>
 
 static uint count = 1;
+
+struct list_head *elem, *safe;
+
+struct hello_data {
+	struct list_head list;
+	ktime_t time;
+};
+
+struct hello_data *data;
 
 MODULE_AUTHOR("Serhii Popovych <serhii.popovych@globallogic.com>");
 MODULE_DESCRIPTION("Hello, world in Linux Kernel Training");
 MODULE_LICENSE("Dual BSD/GPL");
 module_param(count, uint, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 MODULE_PARM_DESC(count,  "The parameter shows how many times the message will be displayed.");
+
+LIST_HEAD(list);
 
 static int __init hello_init(void)
 {
@@ -52,6 +66,9 @@ static int __init hello_init(void)
 	}else if(count > 0 && count <= 5){
 		int i = 0;
 		for(; i < count; i++){
+			data = kmalloc(sizeof(*data), GFP_KERNEL);
+			data->time = ktime_get();
+			list_add_tail(&(data->list), &list);
 			printk(KERN_EMERG "Hello, world!\n");
 		}
 	}else{
@@ -64,7 +81,12 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
-	/* Do nothing here right now */
+	list_for_each_safe(elem, safe, &list){
+		data = list_entry(elem, struct hello_data, list);
+		pr_alert("ktime: %lu\n", (unsigned long) data->time);
+		list_del(elem);
+		kfree(data);
+	}
 }
 
 module_init(hello_init);
